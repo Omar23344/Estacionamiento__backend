@@ -7,8 +7,8 @@ WORKDIR /app
 # Copia los archivos de dependencias primero para aprovechar el cache de Docker
 COPY package*.json ./
 
-# Instala solo las dependencias de producción
-RUN npm install --production
+# Instala TODAS las dependencias (incluyendo devDependencies)
+RUN npm install
 
 # Copia el resto del código fuente
 COPY . .
