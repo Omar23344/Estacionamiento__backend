@@ -1,0 +1,76 @@
+# === OS & Editor ===
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+.history/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# === Logs ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# === Runtime files ===
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# === Dependency directories ===
+node_modules/
+bower_components/
+jspm_packages/
+web_modules/
+
+# === Build output ===
+dist/
+build/
+public/
+.next/
+out/
+.nuxt/
+.vuepress/dist/
+.svelte-kit/
+.cache/
+.parcel-cache/
+.docusaurus/
+.serverless/
+.webpack/
+
+# === Coverage and test ===
+coverage/
+*.lcov
+.nyc_output/
+.rpt2_cache/
+.rts2_cache_*/
+
+# === Environment ===
+.env
+.env.*
+.npm
+.eslintcache
+.stylelintcache
+
+# === Misc ===
+*.tsbuildinfo
+*.tgz
+.yarn-integrity
+.node_repl_history
+.vscode-test
+*.vsix
+
+# === Sensitive or temporary folders ===
+uploads/
+avatar/
+keys/
