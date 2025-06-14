@@ -11,19 +11,15 @@ const router = express.Router();
 function obtenerRegistros(req, res, next) {
     ClienteService.obtenerRegistros()
         .then((registros) => res.json(registros))
-        .catch((err) => {
-            console.log(err);
-            next(err);
-        });
+        .catch((err) => next(err));
 }
 
 // Crear un nuevo registro
 function crearRegistros(req, res, next) {
     const { placa, dueno, lugar } = req.body;
-
     ClienteService.crearRegistro(placa, dueno, lugar)
-        .then(() => {
-            res.status(201).json({ mensaje: "Cliente registrado correctamente." });
+        .then((nuevo) => {
+            res.status(201).json({ mensaje: "Cliente registrado correctamente.", cliente: nuevo });
         })
         .catch(err => next(err));
 }
@@ -31,7 +27,6 @@ function crearRegistros(req, res, next) {
 // Editar un registro existente
 function editarRegistros(req, res, next) {
     const { id, placa, dueno, lugar } = req.body;
-
     ClienteService.editarRegistro(id, placa, dueno, lugar)
         .then(() => {
             res.json({ mensaje: "Cliente actualizado correctamente." });
@@ -42,7 +37,6 @@ function editarRegistros(req, res, next) {
 // Eliminar un registro por ID
 function eliminarRegistros(req, res, next) {
     const { id } = req.params;
-
     ClienteService.eliminarRegistro(id)
         .then(() => {
             res.json({ mensaje: "Cliente eliminado correctamente." });
@@ -50,11 +44,7 @@ function eliminarRegistros(req, res, next) {
         .catch(err => next(err));
 }
 
-router.get("/", obtenerRegistros);
-router.post("/", crearRegistros);
-router.put("/", editarRegistros);
-router.delete("/:id", eliminarRegistros);
-
+// Exporta solo las funciones (no el router)
 export {
     obtenerRegistros,
     crearRegistros,
