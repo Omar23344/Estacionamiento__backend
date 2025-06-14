@@ -32,6 +32,7 @@ const UsuarioService = {
     },
     // Eliminar usuario
     remove: async (id) => {
+        // Elimina el usuario por id (asegúrate que el id sea numérico)
         await pool.query("DELETE FROM usuarios WHERE id = $1", [id]);
     }
 };

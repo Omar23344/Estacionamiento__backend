@@ -53,6 +53,12 @@ const usuarioController = {
     remove: async (req, res, next) => {
         const { id } = req.params;
         try {
+            // Verifica si el usuario existe antes de eliminar
+            const usuarios = await UsuarioService.getAll();
+            const usuario = usuarios.find(u => u.id == id);
+            if (!usuario) {
+                return res.status(404).json({ mensaje: "Usuario no encontrado." });
+            }
             await UsuarioService.remove(id);
             res.json({ mensaje: "Usuario eliminado correctamente." });
         } catch (err) {

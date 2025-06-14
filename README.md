@@ -126,3 +126,173 @@ El problema mencionado corresponde al backend.
 Si tienes archivos de rutas de cliente innecesarios o vacíos en el backend (por ejemplo, archivos duplicados o sin contenido en `src/routes/cliente.routes.mjs`), simplemente elimínalos o déjalos vacíos si no se usan.
 
 Esto ayuda a mantener la estructura del backend limpia y sin archivos redundantes.
+
+### ¿Por qué sigue el error 404 en `/login`?
+
+El error 404 en el frontend indica que la ruta `/login` **no existe** en el backend en la URL pública.  
+En tu backend, el endpoint de login está definido como `POST /usuarios/login`, no como `POST /login`.
+
+#### ¿Cómo solucionarlo?
+
+1. **Asegúrate de que el frontend apunte a `/usuarios/login`**  
+   - Cambia la URL de login en el frontend de `/login` a `/usuarios/login`.
+
+2. **Verifica que el backend esté desplegado y actualizado en Render**  
+   - El backend debe tener la ruta `/usuarios/login` disponible y funcionando.
+
+3. **Prueba el endpoint directamente**  
+   - Usa Postman o tu navegador para hacer un `POST` a `https://estacionamiento-backend.onrender.com/usuarios/login` con el body adecuado.
+
+#### Resumen
+
+- El backend **no tiene** un endpoint `/login` directo.
+- El endpoint correcto es `/usuarios/login`.
+- Ajusta la URL en el frontend para que apunte a `/usuarios/login`.
+
+Con esto, el error 404 desaparecerá y el login funcionará correctamente.
+
+### 📝 Mensaje para GitHub Copilot / documentar cambios
+
+Se actualizó el sistema de registro de vehículos para que al momento de registrar un auto:
+- El vehículo ocupe un lugar específico del estacionamiento (`espacio_id`).
+- El estado del espacio cambie a `'Ocupado'` al registrar el vehículo.
+- El espacio **no se libera automáticamente**, sino **hasta que se registre un pago** con la misma matrícula (placa).
+
+#### Cambios requeridos en la base de datos (`estacionamiento_duqj`):
+
+**Tabla: `espacios`**
+- Debe tener la columna:
+  - `estado` (`VARCHAR`) → para marcar `'Disponible'` o `'Ocupado'`.
+
+**Tabla: `vehiculos`**
+- Debe tener las columnas:
+  - `placa` (`VARCHAR`)
+  - `entrada` (`TIMESTAMP`)
+  - `salida` (`TIMESTAMP`, permite `NULL`)
+  - `espacio_id` (`INT`) → clave foránea a `espacios(id)`
+
+#### Reglas del sistema:
+- Un espacio sólo puede estar **Disponible** si no hay un vehículo sin salida asociado a él.
+- El pago registrado por un vehículo con `placa` X debe actualizar:
+  - `vehiculos.salida = NOW()` (registro de salida)
+  - `espacios.estado = 'Disponible'` para el espacio ocupado por ese vehículo
+
+---
+
+La salida indica que tu base de datos ya tiene las columnas necesarias en la tabla `pagos` (`placa`, `monto`, `fecha`, `metodo`).  
+El mensaje `"already exists, skipping"` significa que no es necesario volver a agregarlas.
+
+**Resumen:**  
+- Tu base de datos está lista para registrar correctamente los pagos con placa, monto y método.
+- No necesitas hacer más cambios en la estructura de la tabla `pagos` para este flujo.
+
+# Endpoints (API Pins) para el Frontend
+
+## Usuarios (Administradores y Empleados)
+- **Obtener todos:**  
+  `GET /usuarios`
+- **Crear:**  
+  `POST /usuarios`  
+  Body: `{ "usuario": "nuevo", "contrasenia": "1234", "rol": "empleado" }`
+- **Editar:**  
+  `PUT /usuarios/:id`  
+  Body: `{ "usuario": "nuevo", "contrasenia": "1234", "rol": "empleado" }`
+- **Eliminar:**  
+  `DELETE /usuarios/:id`
+- **Login:**  
+  `POST /usuarios/login`  
+  Body: `{ "usuario": "admin", "contrasenia": "1234" }`  
+  Respuesta: `{ "usuario": "admin", "rol": "admin" }`
+
+---
+
+## Espacios
+- **Obtener todos:**  
+  `GET /espacios`
+- **Crear:**  
+  `POST /espacios`  
+  Body: `{ "numero": "A1", "estado": "Disponible" }`
+- **Editar:**  
+  `PUT /espacios/:id`  
+  Body: `{ "numero": "A1", "estado": "Ocupado" }`
+- **Cambiar estado:**  
+  `PATCH /espacios/:id`  
+  Body: `{ "estado": "Disponible" }`
+- **Eliminar:**  
+  `DELETE /espacios/:id`
+
+---
+
+## Vehículos
+- **Registrar entrada:**  
+  `POST /vehiculos`  
+  Body: `{ "placa": "ABC123", "marca": "Toyota", "modelo": "Corolla", "color": "Rojo", "espacioId": 1 }`
+- **Historial:**  
+  `GET /vehiculos/historial`
+- **Registrar salida:**  
+  `PATCH /vehiculos/salida/:id`
+
+---
+
+## Pagos
+- **Registrar pago:**  
+  `POST /pagos`  
+  Body: `{ "placa": "ABC123", "metodo": "efectivo" }`  
+  (El backend calcula el monto automáticamente)
+- **Historial de pagos (todos):**  
+  `GET /pagos`
+- **Historial de pagos por día:**  
+  `GET /reportes/pagos?fecha=YYYY-MM-DD`
+
+---
+
+## Reservaciones
+- **Obtener todas:**  
+  `GET /reservaciones`
+- **Crear:**  
+  `POST /reservaciones`  
+  Body: `{ "placa": "ABC123", "fecha": "2024-06-01", "hora": "10:00", "espacioId": 1 }`
+- **Eliminar:**  
+  `DELETE /reservaciones/:id`
+
+---
+
+## Configuración
+- **Obtener tarifa:**  
+  `GET /configuracion/tarifas`
+- **Actualizar tarifa:**  
+  `PUT /configuracion/tarifas`  
+  Body: `{ "tarifa": 50 }`
+
+---
+
+## Reportes
+- **Entradas/salidas por semana:**  
+  `GET /reportes/semana?fecha=YYYY-MM-DD`  
+  (fecha = lunes de la semana)
+- **Historial de pagos por día:**  
+  `GET /reportes/pagos?fecha=YYYY-MM-DD`
+- **Exportar:**  
+  `GET /reportes/export?fecha=YYYY-MM-DD&formato=pdf|excel`
+
+---
+
+## Clientes (si aplica)
+- **Obtener todos:**  
+  `GET /cliente`
+- **Crear:**  
+  `POST /cliente`  
+  Body: `{ "placa": "...", "dueno": "...", "lugar": "..." }`
+- **Editar:**  
+  `PUT /cliente`  
+  Body: `{ "id": 1, "placa": "...", "dueno": "...", "lugar": "..." }`
+- **Eliminar:**  
+  `DELETE /cliente/:id`
+
+---
+
+**Notas:**
+- Todos los endpoints responden en JSON.
+- Los endpoints de eliminación usan el método `DELETE` y requieren el `id` en la URL.
+- El backend calcula el monto del pago automáticamente según la tarifa y el tiempo transcurrido.
+- Para reportes semanales y pagos diarios, usa los endpoints con parámetros de fecha.
